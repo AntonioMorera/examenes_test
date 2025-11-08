@@ -1,8 +1,8 @@
 <?php
 // db.php
-$host = "localhost";
-$user = "root";      // tu usuario
-$pass = "tonimm10";          // tu contraseña
+$host = "sql108.infinityfree.com";
+$user = "if0_40368501";      // tu usuario
+$pass = "E6yIZNXZsOr7y93";          // tu contraseña
 $dbname = "examenes_db";
 
 $conn = new mysqli($host, $user, $pass, $dbname);
