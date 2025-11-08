@@ -1,0 +1,21 @@
+body {
+  font-family: sans-serif;
+  background: #f8f9fa;
+  margin: 40px;
+}
+h1 { color: #2c3e50; }
+fieldset {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+button {
+  background: #2c3e50;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button:hover { background: #1a242f; }

@@ -1,0 +1,108 @@
+/* submit_exam.css */
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fondo y contenedor principal */
+body {
+    background: linear-gradient(to right, #74ebd5, #ACB6E5);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: #ffffff;
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    max-width: 800px;
+    width: 100%;
+}
+
+/* Título */
+h1 {
+    text-align: center;
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+/* Resumen de puntaje */
+.summary {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.summary p {
+    font-size: 18px;
+    margin: 8px 0;
+    color: #555;
+}
+
+.score {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1abc9c;
+}
+
+/* Preguntas */
+.pregunta {
+    background: #f9f9f9;
+    border-left: 6px solid #3498db;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+
+.pregunta:hover {
+    transform: scale(1.02);
+}
+
+.correcta {
+    border-left-color: #2ecc71;
+}
+
+.incorrecta {
+    border-left-color: #e74c3c;
+}
+
+.pregunta em {
+    display: block;
+    margin-top: 8px;
+    font-weight: bold;
+    color: inherit;
+}
+
+.correcta em {
+    color: #2ecc71;
+}
+
+.incorrecta em {
+    color: #e74c3c;
+}
+
+/* Botón volver */
+a {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 12px 25px;
+    background-color: #3498db;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    background-color: #2980b9;
+}
