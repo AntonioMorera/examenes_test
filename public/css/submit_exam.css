@@ -106,3 +106,61 @@ a {
 a:hover {
     background-color: #2980b9;
 }
+
+/* Contenedor del formulario de ranking */
+.upload-score {
+    margin-top: 20px;
+}
+
+/* Input del nombre */
+.upload-score input[type="text"] {
+    padding: 8px;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Botones de acción */
+.upload-score .btn-success {
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.upload-score .btn-success:hover {
+    background-color: #218838;
+}
+
+/* Mensaje de éxito */
+.upload-score .message {
+    margin-top: 5px;
+    color: green;
+    font-weight: bold;
+}
+
+button.btn-upload-ranking {
+    padding: 10px 20px;
+    background-color: #28a745; /* Verde */
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.btn-upload-ranking:hover {
+    background-color: #218838; /* Verde oscuro al pasar el ratón */
+}

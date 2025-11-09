@@ -74,3 +74,18 @@ ul li.no-exams {
     box-shadow: none;
     transform: none;
 }
+
+
+.btn-ranking {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #007BFF;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.btn-ranking:hover {
+    background-color: #0056b3;
+}

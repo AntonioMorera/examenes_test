@@ -5,17 +5,12 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Configuración de la base de datos
-require_once __DIR__ . '/../includes/db.php'; // Aquí debe ir tu conexión: $conn = new mysqli(...);
-
-// Asegurarse de usar UTF-8
+// Conexión a la base de datos
+require_once __DIR__ . '/../includes/db.php';
 $conn->set_charset("utf8mb4");
-
-// take_exam.php
 
 // Obtener el ID del examen desde la URL, si no existe usar 1 por defecto
 $exam_id = isset($_GET['exam_id']) ? intval($_GET['exam_id']) : 1;
-
 
 // Traer información del examen
 $exam_sql = "SELECT * FROM exams WHERE id = $exam_id";
@@ -36,22 +31,24 @@ $questions_result = $conn->query($questions_sql);
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title><?php echo htmlspecialchars($exam['name']); ?></title>
+<title><?= htmlspecialchars($exam['name']); ?></title>
 <link rel="stylesheet" href="./css/take_exam.css">
 </head>
 <body>
 <div class="container">
-    <h1><?php echo htmlspecialchars($exam['name']); ?></h1>
+    <h1><?= htmlspecialchars($exam['name']); ?></h1>
 
-    <form method="post" action="submit_exam.php">
+    <form id="examForm" method="POST" action="submit_exam.php" onsubmit="setTimeTaken()">
         <input type="hidden" name="exam_id" value="<?= $exam_id ?>">
+        <input type="hidden" name="time_taken" id="time_taken" value="0">
+
         <?php
-        $total_questions = $questions_result->num_rows; // Total de preguntas
+        $total_questions = $questions_result->num_rows;
         $question_number = 1;
 
         if($total_questions > 0) {
             while($question = $questions_result->fetch_assoc()) {
-                // Mostrar barra de progreso
+                // Barra de progreso
                 echo "<p class='progress-text'>Pregunta $question_number de $total_questions</p>";
                 echo "<progress value='$question_number' max='$total_questions'></progress>";
 
@@ -79,10 +76,19 @@ $questions_result = $conn->query($questions_sql);
         ?>
 
         <input type="submit" value="Enviar respuestas" class="submit-btn">
-        <a href="../index.php">Volver al inicio</a>
     </form>
-        
-</div>
-</body>
 
+    <a href="../index.php">Volver al inicio</a>
+</div>
+
+<script>
+let startTime = Date.now();
+
+function setTimeTaken() {
+    let endTime = Date.now();
+    let seconds = Math.floor((endTime - startTime) / 1000);
+    document.getElementById('time_taken').value = seconds;
+}
+</script>
+</body>
 </html>

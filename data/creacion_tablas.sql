@@ -32,3 +32,26 @@ CREATE TABLE options (
     is_correct TINYINT(1) NOT NULL,
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- Tabla de usuarios
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100),
+  password VARCHAR(255)
+);
+
+DROP TABLE IF EXISTS results;
+CREATE TABLE results (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  exam_id INT NOT NULL,
+  score DECIMAL(5,2),
+  total_questions INT,
+  correct_answers INT,
+  taken_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+ALTER TABLE results ADD COLUMN time_taken INT DEFAULT 0;

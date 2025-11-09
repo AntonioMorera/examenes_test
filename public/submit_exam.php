@@ -1,31 +1,32 @@
-<?php 
+<?php  
 // submit_exam.php
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require_once __DIR__ . '/../includes/db.php'; // Conexión a la base de datos
+session_start();
+require_once __DIR__ . '/../includes/db.php';
 $conn->set_charset("utf8mb4");
 
-// Obtener el exam_id desde el formulario
+// --------------------------
+// 1. Obtener exam_id
+// --------------------------
 $exam_id = isset($_POST['exam_id']) ? (int)$_POST['exam_id'] : 0;
 
-
-// Recibir todas las respuestas enviadas
+// --------------------------
+// 2. Recibir todas las respuestas enviadas
+// --------------------------
 $respuestas = $_POST;
-
-// Inicializar variables
 $total_preguntas = 0;
 $aciertos = 0;
 $detalles = [];
 
-// Recorrer cada respuesta
+// Solo calcular preguntas si existen en POST (cuando se envían desde el examen)
 foreach($respuestas as $key => $option_id) {
     if(strpos($key, 'question_') === 0) {
         $total_preguntas++;
 
-        // Obtener información de la opción y pregunta
         $sql = "SELECT o.is_correct, o.text as opcion_text, q.text as pregunta_text, o.question_id
                 FROM options o
                 JOIN questions q ON o.question_id = q.id
@@ -38,7 +39,6 @@ foreach($respuestas as $key => $option_id) {
             $correcta = $row['is_correct'] == 1;
             if($correcta) $aciertos++;
 
-            // Obtener la respuesta correcta para mostrarla
             $sql_correcta = "SELECT text FROM options WHERE question_id = ? AND is_correct = 1 LIMIT 1";
             $stmt_correcta = $conn->prepare($sql_correcta);
             $stmt_correcta->bind_param("i", $row['question_id']);
@@ -58,8 +58,53 @@ foreach($respuestas as $key => $option_id) {
     }
 }
 
-// Calcular porcentaje
+// --------------------------
+// 3. Calcular porcentaje y tiempo
+// --------------------------
 $porcentaje = $total_preguntas > 0 ? round(($aciertos / $total_preguntas) * 100, 2) : 0;
+$time_taken = isset($_POST['time_taken']) ? intval($_POST['time_taken']) : 0;
+
+// --------------------------
+// 4. Manejar subida al ranking
+// --------------------------
+$message = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_score'])) {
+
+    $score_to_insert = isset($_POST['score']) ? floatval($_POST['score']) : 0;
+    $time_to_insert = isset($_POST['time_taken']) ? intval($_POST['time_taken']) : 0;
+
+    if (isset($_SESSION['user_id'])) {
+        $user_id = intval($_SESSION['user_id']);
+    } elseif (!empty($_POST['name'])) {
+        $name = trim($_POST['name']);
+        $stmt_user = $conn->prepare("INSERT INTO users (name) VALUES (?)");
+        $stmt_user->bind_param("s", $name);
+        $stmt_user->execute();
+        $user_id = $stmt_user->insert_id;
+        $stmt_user->close();
+    } else {
+        die("Usuario no especificado.");
+    }
+
+    $stmt_result = $conn->prepare("INSERT INTO results (user_id, exam_id, score, time_taken) VALUES (?, ?, ?, ?)");
+    $stmt_result->bind_param("iidi", $user_id, $exam_id, $score_to_insert, $time_to_insert);
+    if ($stmt_result->execute()) {
+        $message = "¡Puntuación subida al ranking con éxito!";
+    } else {
+        $message = "Error al subir la puntuación: " . $stmt_result->error;
+    }
+    $stmt_result->close();
+}
+
+// --------------------------
+// 5. Obtener info del examen
+// --------------------------
+$sql_exam = "SELECT name FROM exams WHERE id = ?";
+$stmt_exam = $conn->prepare($sql_exam);
+$stmt_exam->bind_param("i", $exam_id);
+$stmt_exam->execute();
+$result_exam = $stmt_exam->get_result();
+$exam = $result_exam->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -71,21 +116,22 @@ $porcentaje = $total_preguntas > 0 ? round(($aciertos / $total_preguntas) * 100,
 </head>
 <body>
 <div class="container">
-    <h1>Resultados del examen</h1>
+    <h1>Resultados del examen: <?= htmlspecialchars($exam['name']) ?></h1>
     <div class="summary">
-        <p>Total de preguntas: <?php echo $total_preguntas; ?></p>
-        <p>Respuestas correctas: <?php echo $aciertos; ?></p>
-        <p class="score">Puntuación: <?php echo $porcentaje; ?>%</p>
+        <p>Total de preguntas: <?= $total_preguntas ?></p>
+        <p>Respuestas correctas: <?= $aciertos ?></p>
+        <p>Puntuación: <?= $porcentaje ?>%</p>
+        <p>Tiempo empleado: <?= gmdate("i:s", $time_taken) ?> minutos</p>
     </div>
 
     <hr>
 
     <?php foreach($detalles as $d): ?>
-        <div class="pregunta <?php echo $d['correcta'] ? 'correcta' : 'incorrecta'; ?>">
-            <strong>Pregunta:</strong> <?php echo htmlspecialchars($d['pregunta']); ?><br>
-            <strong>Tu respuesta:</strong> <?php echo htmlspecialchars($d['respuesta']); ?><br>
+        <div class="pregunta <?= $d['correcta'] ? 'correcta' : 'incorrecta'; ?>">
+            <strong>Pregunta:</strong> <?= htmlspecialchars($d['pregunta']); ?><br>
+            <strong>Tu respuesta:</strong> <?= htmlspecialchars($d['respuesta']); ?><br>
             <?php if(!$d['correcta']): ?>
-                <strong>Respuesta correcta:</strong> <?php echo htmlspecialchars($d['respuesta_correcta']); ?><br>
+                <strong>Respuesta correcta:</strong> <?= htmlspecialchars($d['respuesta_correcta']); ?><br>
                 <em>❌ Respuesta incorrecta</em>
             <?php else: ?>
                 <em>✔ Correcta</em>
@@ -93,8 +139,35 @@ $porcentaje = $total_preguntas > 0 ? round(($aciertos / $total_preguntas) * 100,
         </div>
     <?php endforeach; ?>
 
+    <hr>
+
+    <!-- Formulario de subida al ranking -->
+    <div class="upload-score">
+        <form method="POST">
+            <input type="hidden" name="exam_id" value="<?= $exam_id ?>">
+            <input type="hidden" name="score" value="<?= $porcentaje ?>">
+            <input type="hidden" name="time_taken" value="<?= $time_taken ?>">
+            <input type="hidden" name="upload_score" value="1">
+
+            <?php if (!isset($_SESSION['user_id'])): ?>
+                <label>Tu nombre:</label>
+                <input type="text" name="name" required>
+            <?php endif; ?>
+
+            <button type="submit" class="btn-upload-ranking">Subir al ranking 🏆</button>
+        </form>
+
+        <?php if(!empty($message)): ?>
+            <p class="message"><?= $message ?></p>
+        <?php endif; ?>
+
+
+    </div>
+
+
     <a href="take_exam.php?exam_id=<?= $exam_id ?>">Volver al examen</a>
     <a href="../index.php">Volver al inicio</a>
+    <a href="ranking.php?exam_id=<?= $exam_id ?>" class="btn-success" style="margin-top:10px; display:inline-block;">Ver Ranking</a>
 </div>
 </body>
 </html>

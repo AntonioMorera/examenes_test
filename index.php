@@ -24,7 +24,11 @@ $result = $conn->query($sql);
         <?php
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
-                echo "<li><a href='public/take_exam.php?exam_id=".$row['id']."'>".$row['name']."</a></li>";
+                echo "<div class='exam'>";
+                 echo "<li><a href='public/take_exam.php?exam_id=".$row['id']."'>".$row['name']."</a></li>";
+                 echo "<a href='public/ranking.php?exam_id=" . $row['id'] . "' class='btn-ranking'>Ver Ranking</a>";
+
+                echo "</div>";
             }
         } else {
             echo "<li class='no-exams'>No hay exámenes</li>";
