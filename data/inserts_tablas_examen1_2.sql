@@ -61,9 +61,7 @@ INSERT INTO questions (exam_id, text) VALUES (@exam_id, 'La “Voz sobre IP” c
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id, label, text, is_correct) VALUES
 (@question_id, 'A', 'Verdadero', 0),
-(@question_id, 'B', 'Falso', 1),
-(@question_id, 'C', '', 0),
-(@question_id, 'D', '', 0);
+(@question_id, 'B', 'Falso', 1);
 
 -- Pregunta 51
 INSERT INTO questions (exam_id, text) VALUES (@exam_id, '¿Cuál es la página más visitada en el mundo?');
