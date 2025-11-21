@@ -1,10 +1,9 @@
 
--------------------------------------------------
--- EXAMEN GRUPO 4
-INSERT INTO exams (name) VALUES ('DOR - Usabilidad en la Web - Grupo 4');
-SET @exam_id = 26;
 
--- Pregunta 1
+INSERT INTO exams (name) VALUES ('DOR - Usabilidad en la Web - Grupo 4');
+SET @exam_id = LAST_INSERT_ID();
+
+
 INSERT INTO questions (exam_id, text) VALUES (@exam_id, '¿Qué tres aspectos están directamente relacionados con la facilidad de uso?');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
@@ -13,14 +12,14 @@ INSERT INTO options (question_id,label,text,is_correct) VALUES
 (@question_id,'C','Accesibilidad, interactividad, seguridad',0),
 (@question_id,'D','Estética, simplicidad, rapidez',0);
 
--- Pregunta 2
+
 INSERT INTO questions (exam_id,text) VALUES (@exam_id, '¿Es importante que todo tipo de usuarios puedan acceder y moverse a lo largo de la web?');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
 (@question_id,'A','Verdadero',1),
 (@question_id,'B','Falso',0);
 
--- Pregunta 3
+
 INSERT INTO questions (exam_id,text) VALUES (@exam_id, '¿Qué se recomienda en el diseño de una interfaz usable?');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
@@ -29,7 +28,7 @@ INSERT INTO options (question_id,label,text,is_correct) VALUES
 (@question_id,'C','Utilizar lenguaje cercano y comprensible.',1),
 (@question_id,'D','Eliminar elementos familiares del diseño.',0);
 
--- Pregunta 4
+
 INSERT INTO questions (exam_id,text) VALUES (@exam_id, '¿Cuáles de los siguientes métodos NO se usan para analizar la usabilidad?');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
@@ -38,7 +37,7 @@ INSERT INTO options (question_id,label,text,is_correct) VALUES
 (@question_id,'C','Realizar encuestas',0),
 (@question_id,'D','Realizar una evaluación heurística',0);
 
--- Pregunta 5
+
 INSERT INTO questions (exam_id,text) VALUES (@exam_id, '¿Cuál es la ventaja de conocer bien a los usuarios?');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
@@ -47,7 +46,7 @@ INSERT INTO options (question_id,label,text,is_correct) VALUES
 (@question_id,'C','Ayuda a reducir el número de contenidos.',0),
 (@question_id,'D','Permite evitar hacer pruebas de usabilidad.',0);
 
--- Pregunta 6
+
 INSERT INTO questions (exam_id,text) VALUES (@exam_id, '¿A qué grupo de usuarios está dirigido principalmente el uso de atajos aceleradores de uso en una web?');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
@@ -56,7 +55,7 @@ INSERT INTO options (question_id,label,text,is_correct) VALUES
 (@question_id,'C','Usuarios expertos',1),
 (@question_id,'D','A cualquier tipo de usuarios',0);
 
--- Pregunta 7
+
 INSERT INTO questions (exam_id,text) VALUES (@exam_id, '¿Qué pregunta NO forma parte de un sistema de navegación usable?');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
@@ -65,7 +64,7 @@ INSERT INTO options (question_id,label,text,is_correct) VALUES
 (@question_id,'C','¿Cuánto cuesta la página?',1),
 (@question_id,'D','¿A dónde puedo ir?',0);
 
--- Pregunta 8
+
 INSERT INTO questions (exam_id,text) VALUES (@exam_id, 'Respecto al uso de elementos novedosos en el diseño de interfaces usables:');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
@@ -74,7 +73,7 @@ INSERT INTO options (question_id,label,text,is_correct) VALUES
 (@question_id,'C','Los elementos novedosos deben reservarse para los usuarios expertos.',0),
 (@question_id,'D','Lo novedoso no siempre es lo más adecuado',1);
 
--- Pregunta 9
+
 INSERT INTO questions (exam_id,text) VALUES (@exam_id, '¿Qué método se utiliza para analizar dónde fijan la vista los usuarios?');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES

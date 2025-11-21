@@ -1,10 +1,9 @@
 
--------------------------------------------------
--- EXAMEN EQUIPO 1
-INSERT INTO exams (name) VALUES ('DOR - Usabilidad en la Web - Equipo 1');
-SET @exam_id = 25;
 
--- Pregunta 1
+INSERT INTO exams (name) VALUES ('DOR - Usabilidad en la Web - Equipo 1');
+SET @exam_id = LAST_INSERT_ID();
+
+
 INSERT INTO questions (exam_id, text) VALUES (@exam_id,'Señala la opción que NO corresponde a un principio de usabilidad');
 SET @question_id = LAST_INSERT_ID();
 INSERT INTO options (question_id,label,text,is_correct) VALUES
