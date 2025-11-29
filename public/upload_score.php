@@ -14,10 +14,7 @@ $score = floatval($_POST['score']);
 if (isset($_POST['user_id'])) {
     $user_id = intval($_POST['user_id']);
 } elseif (!empty($_POST['name'])) {
-    // Crear usuario temporal o invitado
     $name = trim($_POST['name']);
-
-    // Insertar en users
     $stmt_user = $conn->prepare("INSERT INTO users (name) VALUES (?)");
     $stmt_user->bind_param("s", $name);
     $stmt_user->execute();
@@ -32,10 +29,10 @@ $stmt_result = $conn->prepare("INSERT INTO results (user_id, exam_id, score) VAL
 $stmt_result->bind_param("iid", $user_id, $exam_id, $score);
 
 if ($stmt_result->execute()) {
-    echo "¡Puntuación subida al ranking con éxito!<br>";
-    echo "<a href='ranking.php?exam_id=$exam_id'>Ver ranking completo</a>";
+    echo "<div class='message'>¡Puntuación subida al ranking con éxito! 🏆</div>";
+    echo "<button type='button' class='btn-back' onclick='loadRanking($exam_id)'>Ver ranking completo</button>";
 } else {
-    echo "Error al subir la puntuación: " . $stmt_result->error;
+    echo "<div class='message'>Error al subir la puntuación: " . $stmt_result->error . "</div>";
 }
 
 $stmt_result->close();

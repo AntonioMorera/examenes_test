@@ -1,3 +1,24 @@
+/* --- CSS FINAL MEJORADO --- */
+
+/* Variables CSS para consistencia */
+:root {
+  --primary-color: #3498db;
+  --primary-dark: #2980b9;
+  --secondary-color: #1abc9c;
+  --secondary-dark: #16a085;
+  --accent-color: #9b59b6;
+  --danger-color: #e74c3c;
+  --success-color: #2ecc71;
+  --warning-color: #f39c12;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --gray-color: #6c757d;
+  --border-radius: 12px;
+  --box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  --box-shadow-hover: 0 15px 35px rgba(0,0,0,0.15);
+  --transition: all 0.3s ease;
+}
+
 /* Reset básico */
 * {
     margin: 0;
@@ -8,132 +29,746 @@
 
 /* Fondo y contenedor principal */
 body {
-    background: linear-gradient(to right, #74ebd5, #ACB6E5);
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding: 50px 20px;
+    line-height: 1.6;
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1100px;
     width: 100%;
 }
 
-/* Título */
+/* Título mejorado */
 h1 {
     text-align: center;
-    font-size: 36px;
+    font-size: 2.8rem;
     margin-bottom: 40px;
-    color: #333;
+    color: var(--dark-color);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    padding-bottom: 15px;
 }
 
-/* Tarjetas de exámenes */
-ul {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+h1:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--primary-color);
+    border-radius: 2px;
 }
 
-ul li {
-    background: #ffffff;
-    padding: 25px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-ul li:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-}
-
-ul li a {
-    text-decoration: none;
-    color: #3498db;
-    font-weight: bold;
-    font-size: 18px;
-    display: block;
-    transition: color 0.2s;
-}
-
-ul li a:hover {
-    color: #1abc9c;
-}
-
-.btn-ranking {
-    display: inline-block;
-    padding: 8px 15px;
-    background-color: #007BFF;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-
-.btn-ranking:hover {
-    background-color: #0056b3;
-}
-
-/* Secciones de exámenes */
+/* Secciones de exámenes mejoradas */
 .exam-section {
     margin-bottom: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
 }
 
-/* Toggle */
+.exam-section:hover {
+    box-shadow: var(--box-shadow-hover);
+}
+
+/* Botón toggle mejorado */
 .toggle-btn {
     cursor: pointer;
-    color: #007BFF;
-    display: inline-block;
-    margin: 5px 0;
-    text-decoration: underline;
-}
-
-/* Contenedor ocultable de exámenes */
-.exam-list {
-    display: none;
-    margin-top: 15px;
-}
-
-/* Sub-secciones DPL */
-.dpl-subsection {
-    margin-bottom: 30px;
-}
-
-.dpl-subsection h3 {
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.dpl-subsection ul {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    padding-left: 0;
-}
-
-/* Toggle botones para secciones */
-.toggle-btn {
-    display: inline-block;
-    cursor: pointer;
-    color: #ffffff;                 /* Texto blanco */
-    background-color: #007BFF;      /* Azul principal */
-    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    font-weight: 600;
     text-decoration: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 20px 25px;
+    border-radius: 0;
+    margin-bottom: 0;
+    transition: var(--transition);
+    box-shadow: none;
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    font-size: 1.2rem;
+    position: relative;
 }
 
 .toggle-btn:hover {
-    background-color: #0056b3;      /* Azul más oscuro al pasar el ratón */
+    background: linear-gradient(135deg, var(--primary-dark), #2471a3);
+    transform: none;
+    box-shadow: none;
+    color: #ffffff;
+}
+
+.toggle-btn:after {
+    content: '▼';
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+/* Lista de exámenes */
+.exam-list {
+    display: none;
+    margin-top: 0;
+    padding: 30px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    border-top: 3px solid #e9ecef;
+}
+
+/* Subsecciones mejoradas */
+.dpl-subsection {
+    margin-bottom: 35px;
+}
+
+.dpl-subsection:last-child {
+    margin-bottom: 0;
+}
+
+.dpl-subsection h3 {
+    margin-bottom: 20px;
+    color: var(--dark-color);
+    font-size: 1.3rem;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+}
+
+.dpl-subsection h3:before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 3px;
+    margin-right: 12px;
+}
+
+/* Grid mejorado para ambas secciones */
+#dpl ul,
+#dor ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+    margin: 0;
+}
+
+/* Tarjetas de exámenes mejoradas */
+#dpl ul li,
+#dor ul li {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    text-align: left;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 4px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Colores específicos por sección */
+#dpl ul li {
+    border-top-color: var(--primary-color);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+    border-left: 3px solid var(--primary-color);
+}
+
+#dor ul li {
+    border-top-color: var(--warning-color);
+    background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
+    border-left: 3px solid var(--warning-color);
+}
+
+/* Efecto hover mejorado */
+#dpl ul li:hover,
+#dor ul li:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+#dpl ul li:hover {
+    box-shadow: 0 20px 40px rgba(52, 152, 219, 0.15);
+    border-left-color: var(--primary-dark);
+}
+
+#dor ul li:hover {
+    box-shadow: 0 20px 40px rgba(243, 156, 18, 0.15);
+    border-left-color: #e67e22;
+}
+
+/* Efecto de brillo al hover */
+#dpl ul li:before,
+#dor ul li:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.7s ease;
+}
+
+#dpl ul li:hover:before,
+#dor ul li:hover:before {
+    left: 100%;
+}
+
+/* Títulos de exámenes mejorados */
+#dpl ul li a.btn-load-exam,
+#dor ul li a.btn-load-exam {
+    text-decoration: none;
+    color: var(--dark-color);
+    font-weight: 700;
+    font-size: 1.15rem;
+    display: block;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    padding: 0;
+    flex-grow: 1;
+    position: relative;
+    z-index: 2;
+}
+
+#dpl ul li a.btn-load-exam:hover {
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+#dor ul li a.btn-load-exam:hover {
+    color: var(--warning-color);
+    transform: translateX(5px);
+}
+
+/* Badges identificadores */
+#dpl ul li:after {
+    content: 'DPL';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--primary-color);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 3;
+}
+
+#dor ul li:after {
+    content: 'DOR';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--warning-color);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 3;
+}
+
+/* Botones mejorados */
+.btn-show-questions,
+.btn-ranking {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+/* Botón Ver Preguntas */
+.btn-show-questions {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+}
+
+.btn-show-questions:hover {
+    background: linear-gradient(135deg, var(--primary-dark), #2471a3);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    color: #ffffff;                 /* Texto sigue blanco */
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* Botón Ver Ranking */
+.btn-ranking {
+    background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+    color: white;
+}
+
+.btn-ranking:hover {
+    background: linear-gradient(135deg, var(--secondary-dark), #149174);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(26, 188, 156, 0.3);
+}
+
+/* Efecto de onda en botones */
+.btn-show-questions:before,
+.btn-ranking:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.btn-show-questions:hover:before,
+.btn-ranking:hover:before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Modal mejorado */
+#modalOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+    z-index: 9998;
+}
+
+#examQuestionsContainer {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 800px;
+    width: 90%;
+    max-height: 80%;
+    overflow-y: auto;
+    background: #ffffff;
+    padding: 0;
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    z-index: 9999;
+}
+
+/* Header del modal */
+#examQuestionsContainer:before {
+    content: '';
+    display: block;
+    height: 4px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+/* Botón cerrar mejorado */
+#closeQuestions {
+    display: inline-block;
+    margin: 20px 0 20px 20px;
+    padding: 10px 20px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+#closeQuestions:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Contenido del modal */
+#examQuestions {
+    padding: 0 30px 30px 30px;
+}
+
+/* Preguntas estilo submit_exam mejoradas */
+.pregunta {
+    background: #f9f9f9;
+    border-left: 6px solid var(--primary-color);
+    padding: 18px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: block;
+    width: 100%;
+    transition: var(--transition);
+}
+
+.pregunta:hover {
+    transform: translateX(5px);
+}
+
+.correcta {
+    border-left-color: var(--success-color);
+    background: #f0f9f4;
+}
+
+.incorrecta {
+    border-left-color: var(--danger-color);
+    background: #fdf2f2;
+}
+
+.pregunta strong, .pregunta .question-text {
+    display: block;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.pregunta em {
+    display: block;
+    margin-top: 10px;
+    font-weight: 600;
+    font-style: normal;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.7);
+}
+
+.correcta em {
+    color: var(--success-color);
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.incorrecta em {
+    color: var(--danger-color);
+    background: rgba(231, 76, 60, 0.1);
+}
+
+/* Estilos para take exam dentro del modal */
+#examQuestionsContainer .container {
+    max-width: 800px;
+    width: 100%;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: none;
+    margin-bottom: 20px;
+}
+
+#examQuestionsContainer h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: var(--dark-color);
+}
+
+#examQuestionsContainer .progress-text {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark-color);
+}
+
+#examQuestionsContainer progress {
+    width: 100%;
+    height: 12px;
+    margin-bottom: 25px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#examQuestionsContainer .question-card {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary-color);
+}
+
+#examQuestionsContainer legend {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: var(--dark-color);
+}
+
+#examQuestionsContainer .option-label {
+    display: block;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+    background: white;
+    border: 1px solid #e0e0e0;
+}
+
+#examQuestionsContainer .option-label:hover {
+    background: #e8f4fc;
+    border-color: var(--primary-color);
+}
+
+#examQuestionsContainer .submit-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+#examQuestionsContainer .submit-btn:hover {
+    background: linear-gradient(135deg, var(--primary-dark), #2471a3);
+    transform: translateY(-2px);
+}
+
+/* Botones dentro del modal */
+#examQuestionsContainer a {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 12px 25px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+#examQuestionsContainer a:hover {
+    background: linear-gradient(135deg, var(--primary-dark), #2471a3);
+    transform: translateY(-2px);
+}
+
+/* Botón subir ranking mejorado */
+#examQuestionsContainer .btn-upload-ranking {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--success-color), #27ae60);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: block;
+    margin: 15px auto 0 auto;
+    text-align: center;
+}
+
+#examQuestionsContainer .btn-upload-ranking:hover {
+    background: linear-gradient(135deg, #27ae60, #219653);
+    transform: translateY(-2px);
+}
+
+/* Mensaje de éxito */
+#examQuestionsContainer .message {
+    margin-top: 10px;
+    font-weight: 600;
+    color: var(--success-color);
+    text-align: center;
+    padding: 10px;
+    background: rgba(46, 204, 113, 0.1);
+    border-radius: 6px;
+}
+
+/* Ranking dentro del modal */
+#examQuestionsContainer .ranking-container {
+    width: 100%;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+#examQuestionsContainer table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+#examQuestionsContainer th, 
+#examQuestionsContainer td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+#examQuestionsContainer th {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: #fff;
+    font-weight: 600;
+}
+
+#examQuestionsContainer td {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#examQuestionsContainer tr:nth-child(even) td {
+    background-color: #f1f3f5;
+}
+
+#examQuestionsContainer .btn-back {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--success-color), #27ae60);
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+#examQuestionsContainer .btn-back:hover {
+    background: linear-gradient(135deg, #27ae60, #219653);
+    transform: translateY(-2px);
+}
+
+/* Input nombre en el modal */
+#examQuestionsContainer .upload-score input[name="name"] {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 15px auto 20px auto;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+#examQuestionsContainer .upload-score input[name="name"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    outline: none;
+}
+
+/* Botón Ver ranking mejorado */
+#examQuestionsContainer .btn-view-ranking {
+    display: block;
+    margin: 15px auto 0 auto;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#examQuestionsContainer .btn-view-ranking:hover {
+    background: linear-gradient(135deg, var(--primary-dark), #2471a3);
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%;
+    }
+    
+    h1 {
+        font-size: 2.2rem;
+        margin-bottom: 30px;
+    }
+    
+    #dpl ul,
+    #dor ul {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .exam-section {
+        margin-bottom: 30px;
+    }
+    
+    .exam-list {
+        padding: 20px;
+    }
+    
+    .toggle-btn {
+        padding: 16px 20px;
+        font-size: 1.1rem;
+    }
+    
+    .dpl-subsection h3 {
+        font-size: 1.1rem;
+    }
+    
+    #dpl ul li,
+    #dor ul li {
+        padding: 20px;
+    }
+    
+    #examQuestionsContainer {
+        width: 95%;
+        max-height: 85%;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 30px 15px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    #dpl ul li,
+    #dor ul li {
+        padding: 18px;
+    }
+    
+    .btn-show-questions,
+    .btn-ranking {
+        padding: 14px 20px;
+        font-size: 1rem;
+    }
+    
+    #dpl ul li a.btn-load-exam,
+    #dor ul li a.btn-load-exam {
+        font-size: 1.1rem;
+    }
 }

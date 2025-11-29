@@ -1,6 +1,5 @@
-<?php  
+<?php
 // submit_exam.php
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -9,20 +8,15 @@ session_start();
 require_once __DIR__ . '/../includes/db.php';
 $conn->set_charset("utf8mb4");
 
-// --------------------------
-// 1. Obtener exam_id
-// --------------------------
+// 1️⃣ Obtener exam_id
 $exam_id = isset($_POST['exam_id']) ? (int)$_POST['exam_id'] : 0;
 
-// --------------------------
-// 2. Recibir todas las respuestas enviadas
-// --------------------------
+// 2️⃣ Recibir todas las respuestas enviadas
 $respuestas = $_POST;
 $total_preguntas = 0;
 $aciertos = 0;
 $detalles = [];
 
-// Solo calcular preguntas si existen en POST (cuando se envían desde el examen)
 foreach($respuestas as $key => $option_id) {
     if(strpos($key, 'question_') === 0) {
         $total_preguntas++;
@@ -58,18 +52,13 @@ foreach($respuestas as $key => $option_id) {
     }
 }
 
-// --------------------------
-// 3. Calcular porcentaje y tiempo
-// --------------------------
+// 3️⃣ Calcular porcentaje y tiempo
 $porcentaje = $total_preguntas > 0 ? round(($aciertos / $total_preguntas) * 100, 2) : 0;
 $time_taken = isset($_POST['time_taken']) ? intval($_POST['time_taken']) : 0;
 
-// --------------------------
-// 4. Manejar subida al ranking
-// --------------------------
+// 4️⃣ Subir ranking si se solicita
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_score'])) {
-
     $score_to_insert = isset($_POST['score']) ? floatval($_POST['score']) : 0;
     $time_to_insert = isset($_POST['time_taken']) ? intval($_POST['time_taken']) : 0;
 
@@ -89,16 +78,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_score'])) {
     $stmt_result = $conn->prepare("INSERT INTO results (user_id, exam_id, score, time_taken) VALUES (?, ?, ?, ?)");
     $stmt_result->bind_param("iidi", $user_id, $exam_id, $score_to_insert, $time_to_insert);
     if ($stmt_result->execute()) {
-        $message = "¡Puntuación subida al ranking con éxito!";
+        $message = "¡Puntuación subida al ranking con éxito! 🏆";
     } else {
         $message = "Error al subir la puntuación: " . $stmt_result->error;
     }
     $stmt_result->close();
 }
 
-// --------------------------
-// 5. Obtener info del examen
-// --------------------------
+// 5️⃣ Obtener info del examen
 $sql_exam = "SELECT name FROM exams WHERE id = ?";
 $stmt_exam = $conn->prepare($sql_exam);
 $stmt_exam->bind_param("i", $exam_id);
@@ -107,16 +94,8 @@ $result_exam = $stmt_exam->get_result();
 $exam = $result_exam->fetch_assoc();
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Resultados del examen</title>
-<link rel="stylesheet" href="./css/submit_exam.css">
-</head>
-<body>
-<div class="container">
-    <h1>Resultados del examen: <?= htmlspecialchars($exam['name']) ?></h1>
+<div class="container modal-result">
+    <h2>Resultados del examen: <?= htmlspecialchars($exam['name']) ?></h2>
     <div class="summary">
         <p>Total de preguntas: <?= $total_preguntas ?></p>
         <p>Respuestas correctas: <?= $aciertos ?></p>
@@ -141,7 +120,6 @@ $exam = $result_exam->fetch_assoc();
 
     <hr>
 
-    <!-- Formulario de subida al ranking -->
     <div class="upload-score">
         <form method="POST">
             <input type="hidden" name="exam_id" value="<?= $exam_id ?>">
@@ -155,19 +133,12 @@ $exam = $result_exam->fetch_assoc();
             <?php endif; ?>
 
             <button type="submit" class="btn-upload-ranking">Subir al ranking 🏆</button>
+            
         </form>
 
         <?php if(!empty($message)): ?>
             <p class="message"><?= $message ?></p>
+            <button type="button" class="btn-view-ranking" data-exam-id="<?= $exam_id ?>">Ver ranking 🏆</button>
         <?php endif; ?>
-
-
     </div>
-
-
-    <a href="take_exam.php?exam_id=<?= $exam_id ?>">Volver al examen</a>
-    <a href="../index.php">Volver al inicio</a>
-    <a href="ranking.php?exam_id=<?= $exam_id ?>" class="btn-success" style="margin-top:10px; display:inline-block;">Ver Ranking</a>
 </div>
-</body>
-</html>
