@@ -56,36 +56,7 @@ foreach($respuestas as $key => $option_id) {
 $porcentaje = $total_preguntas > 0 ? round(($aciertos / $total_preguntas) * 100, 2) : 0;
 $time_taken = isset($_POST['time_taken']) ? intval($_POST['time_taken']) : 0;
 
-// 4️⃣ Subir ranking si se solicita
-$message = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_score'])) {
-    $score_to_insert = isset($_POST['score']) ? floatval($_POST['score']) : 0;
-    $time_to_insert = isset($_POST['time_taken']) ? intval($_POST['time_taken']) : 0;
-
-    if (isset($_SESSION['user_id'])) {
-        $user_id = intval($_SESSION['user_id']);
-    } elseif (!empty($_POST['name'])) {
-        $name = trim($_POST['name']);
-        $stmt_user = $conn->prepare("INSERT INTO users (name) VALUES (?)");
-        $stmt_user->bind_param("s", $name);
-        $stmt_user->execute();
-        $user_id = $stmt_user->insert_id;
-        $stmt_user->close();
-    } else {
-        die("Usuario no especificado.");
-    }
-
-    $stmt_result = $conn->prepare("INSERT INTO results (user_id, exam_id, score, time_taken) VALUES (?, ?, ?, ?)");
-    $stmt_result->bind_param("iidi", $user_id, $exam_id, $score_to_insert, $time_to_insert);
-    if ($stmt_result->execute()) {
-        $message = "¡Puntuación subida al ranking con éxito! 🏆";
-    } else {
-        $message = "Error al subir la puntuación: " . $stmt_result->error;
-    }
-    $stmt_result->close();
-}
-
-// 5️⃣ Obtener info del examen
+// 4️⃣ Obtener info del examen
 $sql_exam = "SELECT name FROM exams WHERE id = ?";
 $stmt_exam = $conn->prepare($sql_exam);
 $stmt_exam->bind_param("i", $exam_id);
@@ -121,11 +92,11 @@ $exam = $result_exam->fetch_assoc();
     <hr>
 
     <div class="upload-score">
-        <form method="POST">
+        <!-- CAMBIA el action para que apunte a upload_score.php -->
+        <form method="POST" action="upload_score.php" class="upload-form">
             <input type="hidden" name="exam_id" value="<?= $exam_id ?>">
             <input type="hidden" name="score" value="<?= $porcentaje ?>">
             <input type="hidden" name="time_taken" value="<?= $time_taken ?>">
-            <input type="hidden" name="upload_score" value="1">
 
             <?php if (!isset($_SESSION['user_id'])): ?>
                 <label>Tu nombre:</label>
@@ -133,12 +104,6 @@ $exam = $result_exam->fetch_assoc();
             <?php endif; ?>
 
             <button type="submit" class="btn-upload-ranking">Subir al ranking 🏆</button>
-            
         </form>
-
-        <?php if(!empty($message)): ?>
-            <p class="message"><?= $message ?></p>
-            <button type="button" class="btn-view-ranking" data-exam-id="<?= $exam_id ?>">Ver ranking 🏆</button>
-        <?php endif; ?>
     </div>
 </div>

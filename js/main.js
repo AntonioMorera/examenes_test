@@ -49,26 +49,50 @@ function prepareModalContent(html) {
     const content = getModalContentEl();
     content.innerHTML = html;
 
-    // Preparar formularios
-    const form = content.querySelector('form');
-    if(form) {
-        window.examStartTime = Date.now();
+    // Preparar formularios - DISTINGUIR entre formulario de examen y de upload
+    const forms = content.querySelectorAll('form');
+    
+    forms.forEach(form => {
+        // Verificar si es el formulario del EXAMEN (tiene campos de preguntas)
+        const isExamForm = form.querySelector('input[name^="question_"]') !== null || 
+                          form.querySelector('input[name^="answers["]') !== null;
+        
+        if(isExamForm) {
+            // Es el formulario del EXAMEN
+            window.examStartTime = Date.now();
 
-        // submit del formulario
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            submitExamAJAX(form, content);
-        });
-
-        // botones dentro del formulario
-        content.querySelectorAll('button[type="submit"], .submit-btn, .btn-upload-ranking').forEach(btn => {
-            btn.addEventListener('click', e => {
+            // submit del formulario del examen
+            form.addEventListener('submit', e => {
                 e.preventDefault();
                 submitExamAJAX(form, content);
             });
-            btn.setAttribute('type','button');
-        });
-    }
+
+            // botones dentro del formulario del EXAMEN
+            form.querySelectorAll('button[type="submit"], .submit-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.preventDefault();
+                    submitExamAJAX(form, content);
+                });
+                btn.setAttribute('type','button');
+            });
+        } else {
+            // Es el formulario de UPLOAD (subir al ranking)
+            // GUARDAR el tiempo del examen antes de enviar
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                submitUploadAJAX(form, content);
+            });
+
+            // botones dentro del formulario de UPLOAD
+            form.querySelectorAll('button[type="submit"], .btn-upload-ranking').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.preventDefault();
+                    submitUploadAJAX(form, content);
+                });
+                btn.setAttribute('type','button');
+            });
+        }
+    });
 
     // Botón "Ver ranking" después de subir puntaje
     content.querySelectorAll('.btn-view-ranking').forEach(btn => {
@@ -86,7 +110,11 @@ function prepareModalContent(html) {
 // ------------------ SUBMIT EXAM AJAX ------------------
 function submitExamAJAX(formEl, containerEl) {
     const fd = new FormData(formEl);
-    fd.set('time_taken', Math.floor((Date.now() - (window.examStartTime||Date.now()))/1000));
+    const timeTaken = Math.floor((Date.now() - (window.examStartTime||Date.now()))/1000);
+    fd.set('time_taken', timeTaken);
+    
+    // GUARDAR el tiempo en una variable global para usarlo después
+    window.lastExamTime = timeTaken;
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST','public/submit_exam.php', true);
@@ -97,6 +125,27 @@ function submitExamAJAX(formEl, containerEl) {
         else contentEl.innerHTML = `<p>Error al enviar examen (status ${xhr.status})</p>`;
     };
     xhr.onerror = () => contentEl.innerHTML = '<p>Error de red al enviar examen.</p>';
+    xhr.send(fd);
+}
+
+// ------------------ SUBMIT UPLOAD AJAX ------------------
+function submitUploadAJAX(formEl, containerEl) {
+    const fd = new FormData(formEl);
+    
+    // AÑADIR el tiempo del examen al formulario de upload
+    if (window.lastExamTime) {
+        fd.set('time_taken', window.lastExamTime);
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST','public/upload_score.php', true);
+    const contentEl = getModalContentEl();
+
+    xhr.onload = () => { 
+        if(xhr.status===200) prepareModalContent(xhr.responseText);
+        else contentEl.innerHTML = `<p>Error al subir puntuación (status ${xhr.status})</p>`;
+    };
+    xhr.onerror = () => contentEl.innerHTML = '<p>Error de red al subir puntuación.</p>';
     xhr.send(fd);
 }
 

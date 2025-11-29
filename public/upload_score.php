@@ -1,14 +1,15 @@
 <?php
 session_start();
-include_once '../includes/db.php'; // Ajusta la ruta
+include_once '../includes/db.php';
 
 // Verificar que se recibieron los datos
-if (!isset($_POST['exam_id'], $_POST['score'])) {
+if (!isset($_POST['exam_id'], $_POST['score'], $_POST['time_taken'])) {
     die("Datos incompletos.");
 }
 
 $exam_id = intval($_POST['exam_id']);
 $score = floatval($_POST['score']);
+$time_taken = intval($_POST['time_taken']); // AÑADE ESTA LÍNEA
 
 // Determinar user_id
 if (isset($_POST['user_id'])) {
@@ -24,9 +25,9 @@ if (isset($_POST['user_id'])) {
     die("Usuario no especificado.");
 }
 
-// Insertar resultado en results
-$stmt_result = $conn->prepare("INSERT INTO results (user_id, exam_id, score) VALUES (?, ?, ?)");
-$stmt_result->bind_param("iid", $user_id, $exam_id, $score);
+// MODIFICA la consulta para incluir time_taken
+$stmt_result = $conn->prepare("INSERT INTO results (user_id, exam_id, score, time_taken) VALUES (?, ?, ?, ?)");
+$stmt_result->bind_param("iidi", $user_id, $exam_id, $score, $time_taken);
 
 if ($stmt_result->execute()) {
     echo "<div class='message'>¡Puntuación subida al ranking con éxito! 🏆</div>";
