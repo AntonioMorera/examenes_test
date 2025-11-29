@@ -1,14 +1,14 @@
 <?php
 // db.php
-$host = "localhost";
-$user = "root";      // tu usuario
-$pass = "tonimm10";          // tu contraseña
-$dbname = "examenes_db";
+//$host = "localhost";
+//$user = "root";      // tu usuario
+//$pass = "tonimm10";          // tu contraseña
+//$dbname = "examenes_db";
 
-//$host = "sql108.infinityfree.com";
-//$user = "if0_40368501";     
-//$pass = "E6yIZNXZsOr7y93";          
-//$dbname = "if0_40368501_examenes_db";
+$host = "sql108.infinityfree.com";
+$user = "if0_40368501";     
+$pass = "E6yIZNXZsOr7y93";          
+$dbname = "if0_40368501_examenes_db";
 
 $conn = new mysqli($host, $user, $pass, $dbname);
 
