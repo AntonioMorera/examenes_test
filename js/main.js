@@ -1,4 +1,4 @@
-// main.js - VERSIÓN UNIVERSAL FUNCIONAL
+// main.js - VERSIÓN CORREGIDA
 document.addEventListener('DOMContentLoaded', function() {
     console.log("🌐 Entorno:", window.location.hostname);
     console.log("📂 Ruta base detectada:", getBasePath());
@@ -172,21 +172,34 @@ function setupFormEvents() {
         });
     }
     
-    // 2. Formularios de examen (mantén tu lógica original)
-    const forms = content.querySelectorAll('form');
-    forms.forEach(form => {
-        const isExamForm = form.querySelector('input[name^="question_"]') !== null || 
-                          form.querySelector('input[name^="answers["]') !== null;
+    // 2. Formularios de examen (CORREGIDO)
+    const examForm = content.querySelector('#ajaxExamForm');
+    if (examForm) {
+        console.log("✅ Formulario de examen detectado");
         
-        if(isExamForm) {
-            window.examStartTime = Date.now();
-            form.addEventListener('submit', function(e) {
+        // Configurar tiempo inicial
+        window.examStartTime = Date.now();
+        
+        // Configurar botón de enviar
+        const submitBtn = content.querySelector('.submit-btn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                submitExamForm(this);
+                submitExamForm(examForm);
             });
         }
-    });
+    }
+    
+    // 3. Formulario de subir ranking (en resultados)
+    const uploadForm = content.querySelector('.upload-form');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitRankingForm(this);
+        });
+    }
 }
+
 function sendChatMessage(form) {
     const formData = new FormData(form);
     const basePath = getBasePath();
@@ -299,13 +312,11 @@ function reloadChatMessages(examId) {
     fetch(messagesUrl)
         .then(response => response.text())
         .then(html => {
-
             chatBox.innerHTML = html;
             
             // Scroll al final
             setTimeout(() => {
                 chatBox.scrollTop = chatBox.scrollHeight;
-
             }, 100);
         })
         .catch(error => {
@@ -313,28 +324,132 @@ function reloadChatMessages(examId) {
         });
 }
 
+// ========== SISTEMA DE EXAMENES ==========
 function submitExamForm(form) {
-    // Mantén tu lógica original de examen aquí
-    const formData = new FormData(form);
-    const timeTaken = Math.floor((Date.now() - (window.examStartTime || Date.now())) / 1000);
-    formData.set('time_taken', timeTaken);
-    window.lastExamTime = timeTaken;
+    console.log("📝 Enviando examen...");
     
+    // 1. Validar que todas las preguntas estén respondidas
+    const unanswered = [];
+    const questions = form.querySelectorAll('input[type="radio"]');
+    const questionGroups = {};
+    
+    // Agrupar por pregunta
+    questions.forEach(input => {
+        const name = input.name;
+        if (!questionGroups[name]) {
+            questionGroups[name] = [];
+        }
+        questionGroups[name].push(input);
+    });
+    
+    // Verificar cada grupo
+    Object.keys(questionGroups).forEach(name => {
+        const isAnswered = questionGroups[name].some(input => input.checked);
+        if (!isAnswered) {
+            const questionNumber = name.split('_')[1];
+            unanswered.push(questionNumber);
+        }
+    });
+    
+    if (unanswered.length > 0) {
+        alert(`Por favor responde todas las preguntas. Preguntas sin responder: ${unanswered.join(', ')}`);
+        return;
+    }
+    
+    // 2. Calcular tiempo
+    const timeTaken = Math.floor((Date.now() - (window.examStartTime || Date.now())) / 1000);
+    const timeInput = form.querySelector('#time_taken');
+    if (timeInput) {
+        timeInput.value = timeTaken;
+    }
+    
+    // 3. Preparar datos
+    const formData = new FormData(form);
     const basePath = getBasePath();
     const submitUrl = basePath + 'submit_exam.php';
+    
+    console.log("⏱️ Tiempo empleado:", timeTaken, "segundos");
+    console.log("📤 Enviando a:", submitUrl);
+    
+    // 4. Deshabilitar botón y mostrar carga
+    const submitBtn = form.querySelector('.submit-btn');
+    if (submitBtn) {
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Procesando...';
+        submitBtn.disabled = true;
+        
+        // Enviar datos
+        fetch(submitUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(html => {
+            console.log("✅ Examen procesado correctamente");
+            document.getElementById('examQuestions').innerHTML = html;
+            setupFormEvents(); // Reconfigurar eventos para el formulario de ranking
+        })
+        .catch(error => {
+            console.error("❌ Error enviando examen:", error);
+            alert('Error al enviar examen: ' + error.message);
+        })
+        .finally(() => {
+            // Restaurar botón
+            if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+}
+
+// ========== SISTEMA DE RANKING ==========
+function submitRankingForm(form) {
+    console.log("🏆 Subiendo al ranking...");
+    
+    const formData = new FormData(form);
+    const basePath = getBasePath();
+    const submitUrl = basePath + 'upload_score.php';
+    
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Subiendo...';
+    submitBtn.disabled = true;
     
     fetch(submitUrl, {
         method: 'POST',
         body: formData
     })
-    .then(response => response.text())
-    .then(html => {
-        document.getElementById('examQuestions').innerHTML = html;
-        setupFormEvents();
+    .then(async response => {
+        const responseText = await response.text();
+        console.log("📨 Respuesta ranking:", responseText);
+        
+        if (response.ok) {
+            showNotification('✅ Puntuación subida al ranking', 'success');
+            
+            // Recargar ranking después de 1 segundo
+            setTimeout(() => {
+                const examId = formData.get('exam_id');
+                if (examId) {
+                    loadRanking(examId);
+                }
+            }, 1000);
+        } else {
+            throw new Error('Error del servidor');
+        }
     })
     .catch(error => {
-        console.error("❌ Error enviando examen:", error);
-        alert('Error al enviar examen');
+        console.error("❌ Error subiendo ranking:", error);
+        showNotification('❌ Error al subir al ranking', 'error');
+    })
+    .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     });
 }
 
@@ -349,9 +464,8 @@ function closeQuestions() {
     if (content) content.innerHTML = '';
 }
 
-
-
 // Exportar funciones al scope global
 window.openChatModal = openChatModal;
 window.closeQuestions = closeQuestions;
 window.loadChatMessages = reloadChatMessages;
+window.submitExamForm = submitExamForm;
