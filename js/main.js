@@ -187,31 +187,91 @@ function setupFormEvents() {
         }
     });
 }
-
+// En la función sendChatMessage, actualiza:
 function sendChatMessage(form) {
     const formData = new FormData(form);
     const basePath = getBasePath();
     const sendUrl = basePath + 'send_chat.php';
     
+    // Mostrar estado de envío
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Enviando...';
+    submitBtn.disabled = true;
+    
+    console.log("📤 Enviando mensaje a:", sendUrl);
+    
     fetch(sendUrl, {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Recargar mensajes del chat
+    .then(response => {
+        console.log("📨 Respuesta status:", response.status, response.statusText);
+        
+        // Intentar obtener el texto primero para debug
+        return response.text().then(text => {
+            console.log("📨 Respuesta raw:", text);
+            
+            try {
+                // Intentar parsear como JSON
+                const data = JSON.parse(text);
+                return { ok: response.ok, data: data };
+            } catch (e) {
+                console.error("❌ No es JSON válido:", text);
+                throw new Error(`Respuesta no válida: ${text.substring(0, 100)}`);
+            }
+        });
+    })
+    .then(({ ok, data }) => {
+        if (ok && data.success) {
+            // Recargar mensajes
             const examId = formData.get('exam_id');
             reloadChatMessages(examId);
+            
+            // Limpiar campo de mensaje
             form.querySelector('textarea[name="message"]').value = '';
+            
+            // Notificación visual
+            showNotification('✓ Mensaje enviado', 'success');
         } else {
-            alert(data.error || 'Error al enviar');
+            const errorMsg = data?.error || data?.debug || 'Error desconocido';
+            showNotification(`❌ ${errorMsg}`, 'error');
         }
     })
     .catch(error => {
-        console.error("❌ Error enviando chat:", error);
-        alert('Error de conexión');
+        console.error("❌ Error completo:", error);
+        showNotification('❌ Error de conexión', 'error');
+    })
+    .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     });
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        color: white;
+        border-radius: 5px;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.5s';
+        setTimeout(() => notification.remove(), 500);
+    }, 3000);
 }
 
 function reloadChatMessages(examId) {
