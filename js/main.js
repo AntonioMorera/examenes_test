@@ -190,3 +190,83 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.getElementById('closeQuestions');
     if(closeBtn) closeBtn.addEventListener('click', closeQuestions);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Abrir chat al hacer click en los botones
+document.querySelectorAll('.btn-chat').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.preventDefault();
+        const examId = btn.dataset.examId;
+        openChatModal(examId);
+    });
+});
+
+// Abrir modal y cargar chat
+function openChatModal(examId) {
+    const content = document.querySelector("#examQuestions");
+    if(!content) return console.error("No se encontró #examQuestions");
+
+    // Abrir modal
+    document.getElementById("modalOverlay").style.display = "block";
+    document.getElementById("examQuestionsContainer").style.display = "block";
+
+    fetch(`public/chat.php?exam_id=${examId}`)
+        .then(res => res.text())
+        .then(html => {
+            content.innerHTML = html;
+
+            const chatForm = content.querySelector("#chatForm");
+            if(chatForm){
+                chatForm.addEventListener("submit", function(ev){
+                    ev.preventDefault();
+                    const fd = new FormData(chatForm);
+                    fetch("public/send_chat.php", {
+                        method:"POST",
+                        body: fd
+                    })
+                    .then(r => r.text())
+                    .then(resp => {
+                        console.log("RESPUESTA PHP:", resp);
+                        loadChatMessages(examId); // recarga los mensajes
+                        chatForm.reset(); // limpiar campos
+                    });
+                });
+            }
+
+            // Scroll automático al final
+            const chatBox = content.querySelector("#chat-box");
+            if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+        });
+}
+
+// Recargar solo los mensajes (para evitar recargar todo el modal)
+function loadChatMessages(examId){
+    fetch(`public/chat.php?exam_id=${examId}&only_messages=1`)
+        .then(res => res.text())
+        .then(html => {
+            const chatBox = document.querySelector("#examQuestions #chat-box");
+            if(chatBox) chatBox.innerHTML = html;
+            if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+        });
+}
+
+// Cerrar modal
+function closeQuestions() {
+    document.getElementById("modalOverlay").style.display = "none";
+    document.getElementById("examQuestionsContainer").style.display = "none";
+}
+

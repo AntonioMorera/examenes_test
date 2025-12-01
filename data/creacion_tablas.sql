@@ -55,3 +55,13 @@ CREATE TABLE results (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 ALTER TABLE results ADD COLUMN time_taken INT DEFAULT 0;
+
+DROP TABLE IF EXISTS exam_chat;
+CREATE TABLE exam_chat (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    exam_id INT NOT NULL,
+    user_name VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE
+);
