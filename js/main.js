@@ -299,13 +299,13 @@ function reloadChatMessages(examId) {
     fetch(messagesUrl)
         .then(response => response.text())
         .then(html => {
-            console.log("✅ Mensajes recibidos, longitud:", html.length);
+
             chatBox.innerHTML = html;
             
             // Scroll al final
             setTimeout(() => {
                 chatBox.scrollTop = chatBox.scrollHeight;
-                console.log("📜 Scroll aplicado");
+
             }, 100);
         })
         .catch(error => {
@@ -349,28 +349,7 @@ function closeQuestions() {
     if (content) content.innerHTML = '';
 }
 
-// DEBUG: Verificar si el mensaje realmente se guardó
-function checkIfMessageSaved(examId) {
-    const checkUrl = getBasePath() + `chat.php?exam_id=${examId}&only_messages=1`;
-    
-    setTimeout(() => {
-        fetch(checkUrl)
-            .then(res => res.text())
-            .then(html => {
-                console.log("🔍 Últimos mensajes después de enviar:");
-                console.log(html);
-                
-                // Contar mensajes
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
-                const messageCount = tempDiv.querySelectorAll('p').length;
-                console.log(`📊 Total mensajes: ${messageCount}`);
-            });
-    }, 1000);
-}
 
-// Llamar después de enviar
-checkIfMessageSaved(examId);
 
 // Exportar funciones al scope global
 window.openChatModal = openChatModal;
