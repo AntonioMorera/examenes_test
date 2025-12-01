@@ -224,7 +224,7 @@ function openChatModal(examId) {
     document.getElementById("modalOverlay").style.display = "block";
     document.getElementById("examQuestionsContainer").style.display = "block";
 
-    fetch(`public/chat.php?exam_id=${examId}`)
+    fetch(`/public/chat.php?exam_id=${examId}`)
         .then(res => res.text())
         .then(html => {
             content.innerHTML = html;
@@ -255,7 +255,7 @@ function openChatModal(examId) {
 
 // Recargar solo los mensajes (para evitar recargar todo el modal)
 function loadChatMessages(examId){
-    fetch(`public/chat.php?exam_id=${examId}&only_messages=1`)
+    fetch(`/public/chat.php?exam_id=${examId}&only_messages=1`)
         .then(res => res.text())
         .then(html => {
             const chatBox = document.querySelector("#examQuestions #chat-box");
