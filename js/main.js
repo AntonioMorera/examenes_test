@@ -1,272 +1,274 @@
-// ------------------ MODAL HELPERS ------------------
-function getModalContentEl() { 
-    return document.getElementById('examQuestions') || null;
+// main.js - VERSIÓN UNIVERSAL FUNCIONAL
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("🌐 Entorno:", window.location.hostname);
+    console.log("📂 Ruta base detectada:", getBasePath());
+    
+    // ========== CONFIGURACIÓN DE EVENTOS ==========
+    
+    // 1. Preguntas
+    document.querySelectorAll('.btn-show-questions').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const examId = this.dataset.examId;
+            if(examId) loadQuestions(examId);
+        });
+    });
+    
+    // 2. Ranking
+    document.querySelectorAll('.btn-ranking').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const examId = this.dataset.examId;
+            if(examId) loadRanking(examId);
+        });
+    });
+    
+    // 3. Examen
+    document.querySelectorAll('.btn-load-exam').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const examId = this.dataset.examId;
+            if(examId) loadExam(examId);
+        });
+    });
+    
+    // 4. Chat
+    document.querySelectorAll('.btn-chat').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const examId = this.dataset.examId;
+            if(examId) openChatModal(examId);
+        });
+    });
+    
+    // 5. Toggle secciones
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const target = document.getElementById(this.dataset.target);
+            if(target) {
+                target.style.display = target.style.display === 'block' ? 'none' : 'block';
+            }
+        });
+    });
+    
+    // 6. Tecla ESC para cerrar modal
+    document.addEventListener('keydown', function(e) {
+        if(e.key === 'Escape') closeQuestions();
+    });
+    
+    // 7. Cerrar al hacer click fuera
+    document.getElementById('modalOverlay')?.addEventListener('click', closeQuestions);
+});
+
+// ========== FUNCIÓN PARA DETECTAR RUTA BASE ==========
+function getBasePath() {
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    
+    // 1. Tu localhost específico
+    if (hostname === 'localhost' && port === '82') {
+        return 'public/';  // En local, archivos en public/
+    }
+    
+    // 2. Otros locales
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'public/';  // En local, archivos en public/
+    }
+    
+    // 3. InfinityFree (producción)
+    if (hostname.includes('infinityfree')) {
+        return 'public/';  // En producción, archivos en public/
+    }
+    
+    // 4. Por defecto
+    return 'public/';
 }
 
-function getModalContainerEl() {
-    return document.getElementById('examQuestionsContainer') || null;
+// ========== FUNCIONES PARA CARGAR CONTENIDO ==========
+function loadQuestions(examId) { 
+    openAjaxModal(`get_questions.php?exam_id=${examId}`);
 }
 
-function getOverlayEl() {
-    return document.getElementById('modalOverlay') || null;
+function loadRanking(examId) { 
+    openAjaxModal(`ranking.php?exam_id=${examId}`);
 }
 
-// ------------------ OPEN/CLOSE MODAL ------------------
-function openAjaxModal(url) {
-    const content = getModalContentEl();
-    const container = getModalContainerEl();
-    const overlay = getOverlayEl();
-    if(!content || !container || !overlay) return;
+function loadExam(examId) { 
+    openAjaxModal(`take_exam.php?exam_id=${examId}`);
+}
 
-    content.innerHTML = '<p>Cargando...</p>';
+// ========== SISTEMA PRINCIPAL DE MODALES ==========
+function openAjaxModal(relativeUrl) {
+    const content = document.getElementById('examQuestions');
+    const container = document.getElementById('examQuestionsContainer');
+    const overlay = document.getElementById('modalOverlay');
+    
+    if(!content || !container || !overlay) {
+        console.error("❌ Elementos del modal no encontrados");
+        return;
+    }
+    
+    // Construir URL completa
+    const basePath = getBasePath();
+    const fullUrl = basePath + relativeUrl;
+    
+    console.log("📡 Cargando:", fullUrl);
+    
+    // Mostrar modal
+    content.innerHTML = '<div style="text-align:center; padding:40px;">Cargando...</div>';
     overlay.style.display = 'block';
     container.style.display = 'block';
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.onload = () => {
-        if(xhr.status === 200) prepareModalContent(xhr.responseText);
-        else content.innerHTML = `<p>Error al cargar (status ${xhr.status})</p>`;
-    };
-    xhr.onerror = () => content.innerHTML = '<p>Error de red al cargar la página.</p>';
-    xhr.send();
-}
-
-function closeQuestions() {
-    const container = getModalContainerEl();
-    const overlay = getOverlayEl();
-    if(container) container.style.display = 'none';
-    if(overlay) overlay.style.display = 'none';
-}
-
-// ------------------ LOAD FUNCTIONS ------------------
-function loadQuestions(examId) { openAjaxModal(`/public/get_questions.php?exam_id=${examId}`); }
-function loadExam(examId) { openAjaxModal(`/public/take_exam.php?exam_id=${examId}`); }
-function loadRanking(examId) { openAjaxModal(`/public/ranking.php?exam_id=${examId}`); }
-
-// ------------------ PREPARE MODAL CONTENT ------------------
-function prepareModalContent(html) {
-    const content = getModalContentEl();
-    content.innerHTML = html;
-
-    // Preparar formularios - DISTINGUIR entre formulario de examen y de upload
-    const forms = content.querySelectorAll('form');
     
+    // Usar fetch para mejor manejo de errores
+    fetch(fullUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(html => {
+            content.innerHTML = html;
+            setupFormEvents();
+            
+            // Scroll en chat si existe
+            const chatBox = content.querySelector('#chat-box');
+            if (chatBox) {
+                setTimeout(() => {
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 100);
+            }
+        })
+        .catch(error => {
+            console.error("❌ Error cargando:", error);
+            content.innerHTML = `
+                <div style="color:red; text-align:center; padding:30px;">
+                    <h3>Error al cargar</h3>
+                    <p><strong>${error.message}</strong></p>
+                    <p>URL: ${fullUrl}</p>
+                    <button onclick="closeQuestions()" style="margin-top:20px; padding:10px 20px; background:#dc3545; color:white; border:none; border-radius:5px; cursor:pointer;">
+                        Cerrar
+                    </button>
+                </div>
+            `;
+        });
+}
+
+// ========== SISTEMA DE CHAT ==========
+function openChatModal(examId) {
+    openAjaxModal(`chat.php?exam_id=${examId}`);
+}
+
+function setupFormEvents() {
+    const content = document.getElementById('examQuestions');
+    if (!content) return;
+    
+    // 1. Formulario de chat
+    const chatForm = content.querySelector('#chatForm');
+    if (chatForm) {
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            sendChatMessage(this);
+        });
+    }
+    
+    // 2. Formularios de examen (mantén tu lógica original)
+    const forms = content.querySelectorAll('form');
     forms.forEach(form => {
-        // Verificar si es el formulario del EXAMEN (tiene campos de preguntas)
         const isExamForm = form.querySelector('input[name^="question_"]') !== null || 
                           form.querySelector('input[name^="answers["]') !== null;
         
         if(isExamForm) {
-            // Es el formulario del EXAMEN
             window.examStartTime = Date.now();
-
-            // submit del formulario del examen
-            form.addEventListener('submit', e => {
+            form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                submitExamAJAX(form, content);
-            });
-
-            // botones dentro del formulario del EXAMEN
-            form.querySelectorAll('button[type="submit"], .submit-btn').forEach(btn => {
-                btn.addEventListener('click', e => {
-                    e.preventDefault();
-                    submitExamAJAX(form, content);
-                });
-                btn.setAttribute('type','button');
-            });
-        } else {
-            // Es el formulario de UPLOAD (subir al ranking)
-            // GUARDAR el tiempo del examen antes de enviar
-            form.addEventListener('submit', e => {
-                e.preventDefault();
-                submitUploadAJAX(form, content);
-            });
-
-            // botones dentro del formulario de UPLOAD
-            form.querySelectorAll('button[type="submit"], .btn-upload-ranking').forEach(btn => {
-                btn.addEventListener('click', e => {
-                    e.preventDefault();
-                    submitUploadAJAX(form, content);
-                });
-                btn.setAttribute('type','button');
+                submitExamForm(this);
             });
         }
     });
-
-    // Botón "Ver ranking" después de subir puntaje
-    content.querySelectorAll('.btn-view-ranking').forEach(btn => {
-        btn.addEventListener('click', e => {
-            const examId = btn.dataset.examId;
-            if(examId) loadRanking(examId);
-        });
-    });
-
-    // Cerrar modal
-    const closeBtn = content.querySelector('#closeQuestions');
-    if(closeBtn) closeBtn.addEventListener('click', closeQuestions);
 }
 
-// ------------------ SUBMIT EXAM AJAX ------------------
-function submitExamAJAX(formEl, containerEl) {
-    const fd = new FormData(formEl);
-    const timeTaken = Math.floor((Date.now() - (window.examStartTime||Date.now()))/1000);
-    fd.set('time_taken', timeTaken);
+function sendChatMessage(form) {
+    const formData = new FormData(form);
+    const basePath = getBasePath();
+    const sendUrl = basePath + 'send_chat.php';
     
-    // GUARDAR el tiempo en una variable global para usarlo después
+    fetch(sendUrl, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar mensajes del chat
+            const examId = formData.get('exam_id');
+            reloadChatMessages(examId);
+            form.querySelector('textarea[name="message"]').value = '';
+        } else {
+            alert(data.error || 'Error al enviar');
+        }
+    })
+    .catch(error => {
+        console.error("❌ Error enviando chat:", error);
+        alert('Error de conexión');
+    });
+}
+
+function reloadChatMessages(examId) {
+    const basePath = getBasePath();
+    const messagesUrl = basePath + `chat.php?exam_id=${examId}&only_messages=1`;
+    const chatBox = document.querySelector('#chat-box');
+    
+    if (!chatBox) return;
+    
+    fetch(messagesUrl)
+        .then(response => response.text())
+        .then(html => {
+            chatBox.innerHTML = html;
+            setTimeout(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 50);
+        })
+        .catch(error => console.error("❌ Error recargando mensajes:", error));
+}
+
+function submitExamForm(form) {
+    // Mantén tu lógica original de examen aquí
+    const formData = new FormData(form);
+    const timeTaken = Math.floor((Date.now() - (window.examStartTime || Date.now())) / 1000);
+    formData.set('time_taken', timeTaken);
     window.lastExamTime = timeTaken;
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST','public/submit_exam.php', true);
-    const contentEl = getModalContentEl();
-
-    xhr.onload = () => { 
-        if(xhr.status===200) prepareModalContent(xhr.responseText);
-        else contentEl.innerHTML = `<p>Error al enviar examen (status ${xhr.status})</p>`;
-    };
-    xhr.onerror = () => contentEl.innerHTML = '<p>Error de red al enviar examen.</p>';
-    xhr.send(fd);
-}
-
-// ------------------ SUBMIT UPLOAD AJAX ------------------
-function submitUploadAJAX(formEl, containerEl) {
-    const fd = new FormData(formEl);
     
-    // AÑADIR el tiempo del examen al formulario de upload
-    if (window.lastExamTime) {
-        fd.set('time_taken', window.lastExamTime);
-    }
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST','public/upload_score.php', true);
-    const contentEl = getModalContentEl();
-
-    xhr.onload = () => { 
-        if(xhr.status===200) prepareModalContent(xhr.responseText);
-        else contentEl.innerHTML = `<p>Error al subir puntuación (status ${xhr.status})</p>`;
-    };
-    xhr.onerror = () => contentEl.innerHTML = '<p>Error de red al subir puntuación.</p>';
-    xhr.send(fd);
+    const basePath = getBasePath();
+    const submitUrl = basePath + 'submit_exam.php';
+    
+    fetch(submitUrl, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('examQuestions').innerHTML = html;
+        setupFormEvents();
+    })
+    .catch(error => {
+        console.error("❌ Error enviando examen:", error);
+        alert('Error al enviar examen');
+    });
 }
 
-// ------------------ DOM READY ------------------
-document.addEventListener('DOMContentLoaded', () => {
-
-    // Abrir preguntas
-    document.querySelectorAll('.btn-show-questions').forEach(btn => {
-        btn.addEventListener('click', e => { 
-            const id = e.target.dataset.examId; 
-            if(id) loadQuestions(id);
-        });
-    });
-
-    // Abrir ranking
-    document.querySelectorAll('.btn-ranking').forEach(btn => {
-        btn.addEventListener('click', e => {
-            e.preventDefault();
-            const id = btn.dataset.examId;
-            if(id) loadRanking(id);
-        });
-    });
-
-    // Cargar examen
-    document.querySelectorAll('.btn-load-exam').forEach(btn => {
-        btn.addEventListener('click', e => {
-            e.preventDefault();
-            const id = btn.dataset.examId;
-            if(id) loadExam(id);
-        });
-    });
-
-    // Toggle secciones
-    document.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const target = document.getElementById(btn.dataset.target);
-            if(target) target.style.display = (target.style.display==='block')?'none':'block';
-        });
-    });
-
-    // Botón cerrar modal global
-    const closeBtn = document.getElementById('closeQuestions');
-    if(closeBtn) closeBtn.addEventListener('click', closeQuestions);
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Abrir chat al hacer click en los botones
-document.querySelectorAll('.btn-chat').forEach(btn => {
-    btn.addEventListener('click', e => {
-        e.preventDefault();
-        const examId = btn.dataset.examId;
-        openChatModal(examId);
-    });
-});
-
-// Abrir modal y cargar chat
-function openChatModal(examId) {
-    const content = document.querySelector("#examQuestions");
-    if(!content) return console.error("No se encontró #examQuestions");
-
-    // Abrir modal
-    document.getElementById("modalOverlay").style.display = "block";
-    document.getElementById("examQuestionsContainer").style.display = "block";
-
-    fetch(`/public/chat.php?exam_id=${examId}`)
-        .then(res => res.text())
-        .then(html => {
-            content.innerHTML = html;
-
-            const chatForm = content.querySelector("#chatForm");
-            if(chatForm){
-                chatForm.addEventListener("submit", function(ev){
-                    ev.preventDefault();
-                    const fd = new FormData(chatForm);
-                    fetch("/public/send_chat.php", {
-                        method:"POST",
-                        body: fd
-                    })
-                    .then(r => r.text())
-                    .then(resp => {
-                        console.log("RESPUESTA PHP:", resp);
-                        loadChatMessages(examId); // recarga los mensajes
-                        chatForm.reset(); // limpiar campos
-                    });
-                });
-            }
-
-            // Scroll automático al final
-            const chatBox = content.querySelector("#chat-box");
-            if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-        });
-}
-
-// Recargar solo los mensajes (para evitar recargar todo el modal)
-function loadChatMessages(examId){
-    fetch(`/public/chat.php?exam_id=${examId}&only_messages=1`)
-        .then(res => res.text())
-        .then(html => {
-            const chatBox = document.querySelector("#examQuestions #chat-box");
-            if(chatBox) chatBox.innerHTML = html;
-            if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-        });
-}
-
-// Cerrar modal
+// ========== FUNCIONES GLOBALES ==========
 function closeQuestions() {
-    document.getElementById("modalOverlay").style.display = "none";
-    document.getElementById("examQuestionsContainer").style.display = "none";
+    const container = document.getElementById('examQuestionsContainer');
+    const overlay = document.getElementById('modalOverlay');
+    const content = document.getElementById('examQuestions');
+    
+    if (container) container.style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
+    if (content) content.innerHTML = '';
 }
 
+// Exportar funciones al scope global
+window.openChatModal = openChatModal;
+window.closeQuestions = closeQuestions;
+window.loadChatMessages = reloadChatMessages;

@@ -1,0 +1,27 @@
+# examenestests/.htaccess
+RewriteEngine On
+RewriteBase /
+
+# Redirigir todo a public/ si no es un archivo/directorio existente
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/$1 [L,QSA]
+
+# Permitir acceso a archivos PHP
+<FilesMatch "\.php$">
+    Order Allow,Deny
+    Allow from all
+    Require all granted
+</FilesMatch>
+
+# Headers CORS para AJAX
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type"
+
+# Deshabilitar mod_security
+<IfModule mod_security.c>
+    SecRuleEngine Off
+    SecFilterScanPOST Off
+</IfModule>

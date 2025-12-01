@@ -1,0 +1,18 @@
+# examenestests/public/.htaccess
+Options +FollowSymLinks +ExecCGI
+AddHandler application/x-httpd-php .php
+
+# Permitir acceso a todo
+Order Allow,Deny
+Allow from all
+Require all granted
+
+# Deshabilitar mod_security si causa problemas
+<IfModule mod_security.c>
+    SecRuleEngine Off
+    SecFilterScanPOST Off
+</IfModule>
+
+# Headers adicionales
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
