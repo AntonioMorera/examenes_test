@@ -40,9 +40,9 @@ function closeQuestions() {
 }
 
 // ------------------ LOAD FUNCTIONS ------------------
-function loadQuestions(examId) { openAjaxModal(`public/get_questions.php?exam_id=${examId}`); }
-function loadExam(examId) { openAjaxModal(`public/take_exam.php?exam_id=${examId}`); }
-function loadRanking(examId) { openAjaxModal(`public/ranking.php?exam_id=${examId}`); }
+function loadQuestions(examId) { openAjaxModal(`/public/get_questions.php?exam_id=${examId}`); }
+function loadExam(examId) { openAjaxModal(`/public/take_exam.php?exam_id=${examId}`); }
+function loadRanking(examId) { openAjaxModal(`/public/ranking.php?exam_id=${examId}`); }
 
 // ------------------ PREPARE MODAL CONTENT ------------------
 function prepareModalContent(html) {
@@ -234,7 +234,7 @@ function openChatModal(examId) {
                 chatForm.addEventListener("submit", function(ev){
                     ev.preventDefault();
                     const fd = new FormData(chatForm);
-                    fetch("public/send_chat.php", {
+                    fetch("/public/send_chat.php", {
                         method:"POST",
                         body: fd
                     })
