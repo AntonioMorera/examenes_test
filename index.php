@@ -109,7 +109,7 @@ if($result->num_rows > 0){
                     <a href="#" class="btn-load-exam" data-exam-id="<?= $exam['id'] ?>"><?= $exam['name'] ?></a>
                     <button class="btn-show-questions" data-exam-id="<?= $exam['id'] ?>">Ver Preguntas</button>
                     <a href="#" class="btn-ranking" data-exam-id="<?= $exam['id'] ?>">Ver Ranking</a>
-                    <a href="#" class="btn-chat" data-exam-id="<?= $exam['id'] ?>">Chat 💬</a>
+                    <a href="#" class="btn-chat" data-exam-id="<?= $exam['id'] ?>">Ver Chat</a>
                 </li>
                 <?php endforeach; ?>
             </ul>

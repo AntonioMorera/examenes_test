@@ -17,6 +17,8 @@
   --box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   --box-shadow-hover: 0 15px 35px rgba(0,0,0,0.15);
   --transition: all 0.3s ease;
+  --chat-color: #f39c12;      /* color base del botón Chat */
+  --chat-dark: #e67e22;       
 }
 
 /* Reset básico */
@@ -771,4 +773,52 @@ h1:after {
     #dor ul li a.btn-load-exam {
         font-size: 1.1rem;
     }
+}
+
+
+/* Botón Chat */
+.btn-chat {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    margin-top: 8px;
+    background: linear-gradient(135deg, var(--chat-color), var(--chat-dark));
+    color: white;
+}
+
+.btn-chat:hover {
+    background: linear-gradient(135deg, var(--chat-dark), var(--chat-dark)); /* ajusta el segundo color si quieres */
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(26, 188, 156, 0.3);
+}
+
+/* Efecto de onda */
+.btn-chat:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.btn-chat:hover:before {
+    width: 300px;
+    height: 300px;
 }
