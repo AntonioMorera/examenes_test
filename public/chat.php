@@ -20,52 +20,17 @@ $result = $stmt->get_result();
 // Contar mensajes para mostrar el número
 $message_count = $result->num_rows;
 
-// Función para formatear hora de manera más amigable
-function formatChatTime($datetime) {
-    $time = strtotime($datetime);
-    $now = time();
-    $today = strtotime('today');
-    
-    // Si es hoy, mostrar solo la hora
-    if ($time >= $today) {
-        return date('H:i', $time);
-    }
-    
-    // Si es ayer
-    if ($time >= $today - 86400) {
-        return 'Ayer ' . date('H:i', $time);
-    }
-    
-    // Si es esta semana
-    if ($time >= $today - (6 * 86400)) {
-        return date('l H:i', $time);
-    }
-    
-    // Otro caso: mostrar fecha completa
-    return date('d/m/Y H:i', $time);
-}
-
 // Si solo se piden los mensajes, devolver solo el contenido del chat
 if($only_messages) {
     // Solo devolver el HTML de los mensajes
     if($message_count > 0) {
         while($row = $result->fetch_assoc()): 
             $user_class = 'message-other';
-            
-            // Determinar si es mensaje propio (basado en nombre de usuario)
-            // Esto es un ejemplo - ajusta según tu lógica de sesión
-            $is_own = false;
-            if(isset($_SESSION['user_name']) && $_SESSION['user_name'] === $row['user_name']) {
-                $is_own = true;
-                $user_class = 'message-own';
-            }
         ?>
         <div class="message <?= $user_class ?>">
             <div class="message-header">
                 <span class="message-user"><?= htmlspecialchars($row['user_name']) ?></span>
-                <span class="message-time" data-time="<?= $row['created_at'] ?>">
-                    <?= formatChatTime($row['created_at']) ?>
-                </span>
+                <span class="message-time"><?= date('H:i', strtotime($row['created_at'])) ?></span>
             </div>
             <div class="message-bubble">
                 <?= htmlspecialchars($row['message']) ?>
@@ -91,16 +56,296 @@ if($only_messages) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat del Examen</title>
     <style>
-        /* ... (todos los estilos anteriores se mantienen igual) ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         
-        /* Solo agregamos este pequeño ajuste */
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-header {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .chat-header h2 i {
+            font-size: 1.8rem;
+        }
+        
+        .chat-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        #chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        /* Estilo para la barra de desplazamiento */
+        #chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #chat-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        #chat-box::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #4b6cb7 0%, #182848 100%);
+            border-radius: 10px;
+        }
+        
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message-own {
+            align-self: flex-end;
+        }
+        
+        .message-other {
+            align-self: flex-start;
+        }
+        
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .message-user {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        
         .message-time {
             font-size: 0.75rem;
             color: #777;
             margin-left: 10px;
-            font-style: italic;
         }
         
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            line-height: 1.4;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+        
+        .message-own .message-bubble {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message-other .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .empty-chat {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+            width: 100%;
+        }
+        
+        .empty-chat i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #c3cfe2;
+        }
+        
+        .chat-form-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 16px 16px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row input {
+            flex: 1;
+        }
+        
+        input, textarea {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4b6cb7;
+            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        #submit-btn {
+            width: 100%;
+            padding: 14px 24px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(75, 108, 183, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .chat-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #777;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification.success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .notification.info {
+            border-left: 4px solid #17a2b8;
+        }
+        
+        /* Estilo para iconos */
+        .icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .chat-container {
+                border-radius: 0;
+                box-shadow: none;
+            }
+            
+            #chat-box {
+                height: 350px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .chat-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .chat-info {
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,20 +364,11 @@ if($only_messages) {
             <?php if($message_count > 0): 
                 while($row = $result->fetch_assoc()): 
                     $user_class = 'message-other';
-                    
-                    // Determinar si es mensaje propio
-                    $is_own = false;
-                    if(isset($_SESSION['user_name']) && $_SESSION['user_name'] === $row['user_name']) {
-                        $is_own = true;
-                        $user_class = 'message-own';
-                    }
             ?>
                 <div class="message <?= $user_class ?>">
                     <div class="message-header">
                         <span class="message-user"><?= htmlspecialchars($row['user_name']) ?></span>
-                        <span class="message-time" data-time="<?= $row['created_at'] ?>">
-                            <?= formatChatTime($row['created_at']) ?>
-                        </span>
+                        <span class="message-time"><?= date('H:i', strtotime($row['created_at'])) ?></span>
                     </div>
                     <div class="message-bubble">
                         <?= htmlspecialchars($row['message']) ?>
@@ -185,54 +421,6 @@ if($only_messages) {
         if(localStorage.getItem('chat_user_name') && !document.getElementById('user_name').value) {
             document.getElementById('user_name').value = localStorage.getItem('chat_user_name');
             currentUser = localStorage.getItem('chat_user_name');
-        }
-        
-        // Función para formatear la hora (similar a PHP)
-        function formatTime(datetime) {
-            const date = new Date(datetime);
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            
-            // Opciones para formatear
-            const timeOptions = { hour: '2-digit', minute: '2-digit' };
-            
-            // Si es hoy
-            if (messageDate.getTime() === today.getTime()) {
-                return date.toLocaleTimeString('es-ES', timeOptions);
-            }
-            
-            // Si es ayer
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            if (messageDate.getTime() === yesterday.getTime()) {
-                return 'Ayer ' + date.toLocaleTimeString('es-ES', timeOptions);
-            }
-            
-            // Si es esta semana
-            const weekAgo = new Date(today);
-            weekAgo.setDate(weekAgo.getDate() - 6);
-            
-            if (messageDate >= weekAgo) {
-                const dayName = date.toLocaleDateString('es-ES', { weekday: 'long' });
-                return dayName.charAt(0).toUpperCase() + dayName.slice(1) + ' ' + 
-                       date.toLocaleTimeString('es-ES', timeOptions);
-            }
-            
-            // Otro caso: mostrar fecha completa
-            return date.toLocaleDateString('es-ES') + ' ' + 
-                   date.toLocaleTimeString('es-ES', timeOptions);
-        }
-        
-        // Función para actualizar tiempos relativos
-        function updateRelativeTimes() {
-            document.querySelectorAll('.message-time').forEach(element => {
-                const datetime = element.getAttribute('data-time');
-                if (datetime) {
-                    element.textContent = formatTime(datetime);
-                }
-            });
         }
         
         // Función para mostrar notificaciones
@@ -295,9 +483,6 @@ if($only_messages) {
                 
                 // Actualizar solo el contenido del chat
                 document.getElementById('chat-box').innerHTML = html;
-                
-                // Actualizar tiempos relativos
-                updateRelativeTimes();
                 
                 // Contar mensajes
                 const messageElements = document.querySelectorAll('.message');
