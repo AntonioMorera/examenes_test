@@ -187,62 +187,72 @@ function setupFormEvents() {
         }
     });
 }
-// En la función sendChatMessage, actualiza:
 function sendChatMessage(form) {
     const formData = new FormData(form);
     const basePath = getBasePath();
     const sendUrl = basePath + 'send_chat.php';
+    const examId = formData.get('exam_id');
     
-    // Mostrar estado de envío
+    console.log("📤 Enviando a:", sendUrl);
+    console.log("📦 Datos:", {
+        exam_id: examId,
+        name: formData.get('name'),
+        message: formData.get('message')
+    });
+    
+    // Deshabilitar botón temporalmente
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Enviando...';
     submitBtn.disabled = true;
     
-    console.log("📤 Enviando mensaje a:", sendUrl);
-    
     fetch(sendUrl, {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        console.log("📨 Respuesta status:", response.status, response.statusText);
+    .then(async response => {
+        console.log("📨 Status:", response.status, response.statusText);
         
-        // Intentar obtener el texto primero para debug
-        return response.text().then(text => {
-            console.log("📨 Respuesta raw:", text);
+        const responseText = await response.text();
+        console.log("📨 Respuesta completa:", responseText);
+        
+        try {
+            const data = JSON.parse(responseText);
+            console.log("📨 JSON parseado:", data);
             
-            try {
-                // Intentar parsear como JSON
-                const data = JSON.parse(text);
-                return { ok: response.ok, data: data };
-            } catch (e) {
-                console.error("❌ No es JSON válido:", text);
-                throw new Error(`Respuesta no válida: ${text.substring(0, 100)}`);
+            if (data.success) {
+                // ✅ ÉXITO
+                console.log("✅ Mensaje enviado exitosamente");
+                
+                // 1. Recargar mensajes
+                reloadChatMessages(examId);
+                
+                // 2. Limpiar solo el campo de mensaje (mantener nombre)
+                const messageField = form.querySelector('textarea[name="message"]');
+                if (messageField) {
+                    messageField.value = '';
+                    messageField.focus();
+                }
+                
+                // 3. Mostrar notificación
+                showNotification('✓ Mensaje enviado', 'success');
+            } else {
+                // ❌ Error del servidor
+                console.error("❌ Error del servidor:", data.error);
+                showNotification(`❌ Error: ${data.error || 'Error desconocido'}`, 'error');
             }
-        });
-    })
-    .then(({ ok, data }) => {
-        if (ok && data.success) {
-            // Recargar mensajes
-            const examId = formData.get('exam_id');
-            reloadChatMessages(examId);
-            
-            // Limpiar campo de mensaje
-            form.querySelector('textarea[name="message"]').value = '';
-            
-            // Notificación visual
-            showNotification('✓ Mensaje enviado', 'success');
-        } else {
-            const errorMsg = data?.error || data?.debug || 'Error desconocido';
-            showNotification(`❌ ${errorMsg}`, 'error');
+        } catch (e) {
+            console.error("❌ Error parseando JSON:", e);
+            console.error("❌ Respuesta recibida:", responseText);
+            showNotification('❌ Error en la respuesta del servidor', 'error');
         }
     })
     .catch(error => {
-        console.error("❌ Error completo:", error);
+        console.error("❌ Error de red:", error);
         showNotification('❌ Error de conexión', 'error');
     })
     .finally(() => {
+        // Restaurar botón
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
     });
@@ -279,17 +289,28 @@ function reloadChatMessages(examId) {
     const messagesUrl = basePath + `chat.php?exam_id=${examId}&only_messages=1`;
     const chatBox = document.querySelector('#chat-box');
     
-    if (!chatBox) return;
+    if (!chatBox) {
+        console.warn("⚠️ No se encontró #chat-box");
+        return;
+    }
+    
+    console.log("🔄 Recargando mensajes desde:", messagesUrl);
     
     fetch(messagesUrl)
         .then(response => response.text())
         .then(html => {
+            console.log("✅ Mensajes recibidos, longitud:", html.length);
             chatBox.innerHTML = html;
+            
+            // Scroll al final
             setTimeout(() => {
                 chatBox.scrollTop = chatBox.scrollHeight;
-            }, 50);
+                console.log("📜 Scroll aplicado");
+            }, 100);
         })
-        .catch(error => console.error("❌ Error recargando mensajes:", error));
+        .catch(error => {
+            console.error("❌ Error recargando mensajes:", error);
+        });
 }
 
 function submitExamForm(form) {
@@ -327,6 +348,29 @@ function closeQuestions() {
     if (overlay) overlay.style.display = 'none';
     if (content) content.innerHTML = '';
 }
+
+// DEBUG: Verificar si el mensaje realmente se guardó
+function checkIfMessageSaved(examId) {
+    const checkUrl = getBasePath() + `chat.php?exam_id=${examId}&only_messages=1`;
+    
+    setTimeout(() => {
+        fetch(checkUrl)
+            .then(res => res.text())
+            .then(html => {
+                console.log("🔍 Últimos mensajes después de enviar:");
+                console.log(html);
+                
+                // Contar mensajes
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const messageCount = tempDiv.querySelectorAll('p').length;
+                console.log(`📊 Total mensajes: ${messageCount}`);
+            });
+    }, 1000);
+}
+
+// Llamar después de enviar
+checkIfMessageSaved(examId);
 
 // Exportar funciones al scope global
 window.openChatModal = openChatModal;
