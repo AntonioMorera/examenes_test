@@ -18,7 +18,7 @@ if($result->num_rows > 0){
             $dpl_previos[] = $row;
         } elseif(strpos($row['name'], 'DOR')===0){
             $dor_exams[] = $row;
-        } elseif(stripos(trim($row['name']), 'DPL RECUPERACION') === 0){
+        } elseif(stripos($row['name'], 'DPL RECUPERACION') !== false){
             $dpl_examen_recu[] = $row;
         } else {
             $dpl_otros[] = $row;
