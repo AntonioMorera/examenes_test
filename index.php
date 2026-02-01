@@ -5,6 +5,7 @@ $sql = "SELECT * FROM exams ORDER BY name";
 $result = $conn->query($sql);
 
 $dpl_previos = [];
+$dpl_examen_recu = [];
 $dpl_otros = [];
 $dor_exams = [];
 $pdf_ut2 = []; 
@@ -17,6 +18,8 @@ if($result->num_rows > 0){
             $dpl_previos[] = $row;
         } elseif(strpos($row['name'], 'DOR')===0){
             $dor_exams[] = $row;
+        } elseif(strpos($row['name'], 'DPL RECUPERACION')===0){
+            $dpl_examen_recu[] = $row;
         } else {
             $dpl_otros[] = $row;
         }
@@ -48,6 +51,21 @@ if($result->num_rows > 0){
                 <h3>📝 Conocimientos Previos</h3>
                 <ul>
                     <?php foreach($dpl_previos as $exam): ?>
+                    <li>
+                        <a href="#" class="btn-load-exam" data-exam-id="<?= $exam['id'] ?>"><?= $exam['name'] ?></a>
+                        <button class="btn-show-questions" data-exam-id="<?= $exam['id'] ?>">Ver Preguntas</button>
+                        <a href="#" class="btn-ranking" data-exam-id="<?= $exam['id'] ?>">Ver Ranking</a>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <?php endif; ?>
+
+                <?php if(!empty($dpl_examen_recu)): ?>
+            <div class="dpl-subsection">
+                <h3>📝 Examenes de recuperacion</h3>
+                <ul>
+                    <?php foreach($dpl_examen_recu as $exam): ?>
                     <li>
                         <a href="#" class="btn-load-exam" data-exam-id="<?= $exam['id'] ?>"><?= $exam['name'] ?></a>
                         <button class="btn-show-questions" data-exam-id="<?= $exam['id'] ?>">Ver Preguntas</button>
