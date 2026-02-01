@@ -6,6 +6,7 @@ $result = $conn->query($sql);
 
 $dpl_previos = [];
 $dpl_examen_recu = [];
+$dpl_ssh = [];
 $dpl_otros = [];
 $dor_exams = [];
 $pdf_ut2 = []; 
@@ -20,6 +21,8 @@ if($result->num_rows > 0){
             $dor_exams[] = $row;
         } elseif(stripos($row['name'], 'DPL RECUPERACION') !== false){
             $dpl_examen_recu[] = $row;
+        } elseif(stripos($row['name'], 'SSH') !== false){
+            $dpl_ssh[] = $row;
         } else {
             $dpl_otros[] = $row;
         }
@@ -61,11 +64,26 @@ if($result->num_rows > 0){
             </div>
             <?php endif; ?>
 
-                <?php if(!empty($dpl_examen_recu)): ?>
+            <?php if(!empty($dpl_examen_recu)): ?>
             <div class="dpl-subsection">
                 <h3>📝 Examenes de recuperacion</h3>
                 <ul>
                     <?php foreach($dpl_examen_recu as $exam): ?>
+                    <li>
+                        <a href="#" class="btn-load-exam" data-exam-id="<?= $exam['id'] ?>"><?= $exam['name'] ?></a>
+                        <button class="btn-show-questions" data-exam-id="<?= $exam['id'] ?>">Ver Preguntas</button>
+                        <a href="#" class="btn-ranking" data-exam-id="<?= $exam['id'] ?>">Ver Ranking</a>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <?php endif; ?>
+
+            <?php if(!empty($dpl_ssh)): ?>
+            <div class="dpl-subsection">
+                <h3>📝 Examen SSH</h3>
+                <ul>
+                    <?php foreach($dpl_ssh as $exam): ?>
                     <li>
                         <a href="#" class="btn-load-exam" data-exam-id="<?= $exam['id'] ?>"><?= $exam['name'] ?></a>
                         <button class="btn-show-questions" data-exam-id="<?= $exam['id'] ?>">Ver Preguntas</button>
